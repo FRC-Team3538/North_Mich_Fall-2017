@@ -261,7 +261,7 @@ public:
 					4), DriveRight2(5), EncoderLeft(0, 1), EncoderRight(2, 3), table(
 			NULL), ahrs(NULL), modeState(0), DiIn9(9), DiIn8(8), DiIn7(7), Winch0(
 					8), Winch1(9), Shooter0(12), Shooter1(7), Conveyor(13), Agitator0(
-					6), Agitator1(15), FloorIntakeRoller(14), KickerWheel(11), DeflectorMotor(
+					14), Agitator1(15), FloorIntakeRoller(6), KickerWheel(11), DeflectorMotor(
 					10), EncoderKicker(20, 21), EncoderShoot(4, 5), WinchStop(
 					6), DeflectorAnglePOT(0, 270, 0), DeflectorTarget(0), ConvCommandPWM(
 					0.1), ShootCommandPWM(0.75), DeflectAngle(145), DeflectorHighLimit(
@@ -636,22 +636,21 @@ public:
 		 */
 
 		// Turn on the shooter when right hand trigger is pushed
-		if (OperatorStick.GetRawAxis(3) > Deadband) {
-			if (!operatorRightTriggerPrev and ShooterClosedLoop) { //Start timer and enable PID if closed loop
-				ShooterDelay.Reset();
-				ShooterDelay.Start();
-				ShooterPID.Reset();
-				ShooterPID.Enable();
-				operatorRightTriggerPrev = true;
-			} else if (!operatorRightTriggerPrev) { //Start timer if not closed loop
-				ShooterDelay.Reset();
-				ShooterDelay.Start();
-				operatorRightTriggerPrev = true;
-			}
-
-			if (ShooterClosedLoop) {
-				//0.430 is a scaling factor to make the PID reach desired RPM
-				ShooterPID.SetSetpoint(ShootCommandRPM / 60.0);
+//		if (OperatorStick.GetRawAxis(3) > Deadband) {
+//			if (!operatorRightTriggerPrev and ShooterClosedLoop) { //Start timer and enable PID if closed loop//			ShooterDelay.Reset();
+//		ShooterDelay.Start();
+//				ShooterPID.Reset();
+//				ShooterPID.Enable();
+//				operatorRightTriggerPrev = true;
+//			} else if (!operatorRightTriggerPrev) { //Start timer if not closed loop
+//				ShooterDelay.Reset();
+//				ShooterDelay.Start();
+//				operatorRightTriggerPrev = true;
+//			}
+//
+//			if (ShooterClosedLoop) {
+//				//0.430 is a scaling factor to make the PID reach desired RPM
+//				ShooterPID.SetSetpoint(ShootCommandRPM / 60.0);
 //
 //				double err = (ShootCommandRPM / 60.0) - EncoderShoot.GetRate();
 //				double com = 0.8;
@@ -662,53 +661,58 @@ public:
 //				SmartDashboard::PutNumber("DBG: err", err);
 //				SmartDashboard::PutNumber("DBG: enc", EncoderShoot.GetRate());
 //				SmartDashboard::PutNumber("DBG: cmd", cmd);
-
-			} else {
-				Shooter0.Set(-ShootCommandPWM); // negative so they turn the correct way.
-			}
-
-		} else {
-			operatorRightTriggerPrev = false;
-			if (ShooterClosedLoop) {
-				ShooterPID.SetSetpoint(0.0); // ADLAI - this might be redundant with the disable but I don't think it matters.
-				ShooterPID.Disable();
-			} else {
-				Shooter0.Set(0.0);
-			}
-		}
+//
+//			} else {
+//				Shooter0.Set(-ShootCommandPWM); // negative so they turn the correct way.
+//			}
+//
+//		} else {
+//			operatorRightTriggerPrev = false;
+//			if (ShooterClosedLoop) {
+//				ShooterPID.SetSetpoint(0.0); // ADLAI - this might be redundant with the disable but I don't think it matters.
+//				ShooterPID.Disable();
+//			} else {
+//				Shooter0.Set(0.0);
+//			}
+//		}
 
 		// Turn on Kicker Wheel, conveyor, and agitators when right trigger is pressed
-		if (OperatorStick.GetRawAxis(3) > Deadband
-				and ShooterDelay.Get() > 0.2) {
-
-			Conveyor.Set(OperatorStick.GetRawAxis(3));
-			Agitator0.Set(OperatorStick.GetRawAxis(3));
-
-			if (KickerClosedLoop) {
-				KickerPID.SetSetpoint(KickerCommandRPM);
-				KickerPID.Enable();
-			} else {
-				KickerWheel.Set(KickerCommandPWM);
-			}
-		} else {
-
-			Conveyor.Set(0.0);
-			Agitator0.Set(0.0);
-
-			if (KickerClosedLoop) {
-				KickerPID.SetSetpoint(0.0);
-				KickerPID.Disable();
-			} else {
-				KickerWheel.Set(0.0);
-			}
-		}
+//		if (OperatorStick.GetRawAxis(3) > Deadband
+//				and ShooterDelay.Get() > 0.2) {
+//
+//			Conveyor.Set(OperatorStick.GetRawAxis(3));
+//			Agitator0.Set(OperatorStick.GetRawAxis(3));
+//
+//			if (KickerClosedLoop) {
+//				KickerPID.SetSetpoint(KickerCommandRPM);
+//				KickerPID.Enable();
+//			} else {
+//				KickerWheel.Set(KickerCommandPWM);
+//			}
+//		} else {
+//
+//			Conveyor.Set(0.0);
+//			Agitator0.Set(0.0);
+//
+//			if (KickerClosedLoop) {
+//				KickerPID.SetSetpoint(0.0);
+//				KickerPID.Disable();
+//			} else {
+//				KickerWheel.Set(0.0);
+//			}
+//		}
 
 		//Spin intake when left trigger is pushed
 		if (OperatorStick.GetRawAxis(2) > Deadband) {
 			FloorIntakeRoller.Set(OperatorStick.GetRawAxis(2));
-		} else {
+		}
+		else if (OperatorStick.GetRawAxis(3) > Deadband) {
+				FloorIntakeRoller.Set(-OperatorStick.GetRawAxis(3));
+			}
+		 else {
 			FloorIntakeRoller.Set(0.0);
 		}
+
 
 		// RH Bumper - Retract Intake
 		if (OperatorStick.GetRawButton(6)) {
