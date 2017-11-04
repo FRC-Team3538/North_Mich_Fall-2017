@@ -232,6 +232,7 @@ class Robot: public frc::IterativeRobot {
 	Solenoid *FloorIntakeArm = new Solenoid(2);
 	Solenoid *GearIn = new Solenoid(3);
 	Solenoid *GearOut = new Solenoid(1);
+	Solenoid *GearFlipper = new Solenoid(4);
 	Encoder EncoderKicker;
 	Encoder EncoderShoot;
 	DigitalInput WinchStop;
@@ -721,6 +722,13 @@ public:
 		// LH Bumper - Deploy Intake
 		if (OperatorStick.GetRawButton(5)) {
 			intakeDeployed = true;
+		}
+		// Y button press - raise Gear flipper
+		if (OperatorStick.GetRawButton(4)){
+			GearFlipper->Set(true);
+		}
+		else{
+			GearFlipper->Set(false);
 		}
 
 		//A button for intake un-jam
