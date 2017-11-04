@@ -724,12 +724,8 @@ public:
 			intakeDeployed = true;
 		}
 		// Y button press - raise Gear flipper
-		if (OperatorStick.GetRawButton(4)){
-			GearFlipper->Set(true);
-		}
-		else{
-			GearFlipper->Set(false);
-		}
+
+			GearFlipper->Set(OperatorStick.GetRawButton(4));
 
 		//A button for intake un-jam
 		if (OperatorStick.GetRawButton(1))
